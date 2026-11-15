@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- CSP: skrip hanya dari situs ini + Google Identity Services.
+       connect-src mengizinkan Apps Script dan domain pengalihan (redirect) jawabannya. -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 script-src 'self' https://accounts.google.com/gsi/client;
+                 style-src 'self' https://accounts.google.com/gsi/style;
+                 frame-src https://accounts.google.com/gsi/;
+                 connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/;
+                 img-src 'self' data: https://*.googleusercontent.com;
+                 base-uri 'none';
+                 form-action 'none'">
+  <title>HUMORA · Phase 0 Technical Spike</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">HUMORA <span class="tag">Phase 0 · halaman uji teknis</span></div>
+  </header>
+
+  <main class="wrap">
+    <p class="notice">
+      Halaman ini hanya untuk menguji koneksi teknis. Gunakan <strong>teks contoh sintetis</strong> saja.
+      Jangan masukkan esai asli, data pribadi, atau informasi sensitif: teks dikirim ke Gemini versi gratis,
+      yang dapat digunakan Google untuk meningkatkan produknya dan dapat dibaca peninjau manusia.
+    </p>
+
+    <section class="card" id="card-config">
+      <h2>0 · Konfigurasi</h2>
+      <p id="config-status" class="muted">Memeriksa…</p>
+    </section>
+
+    <section class="card">
+      <h2>1 · Masuk dengan Google</h2>
+      <div id="gsi-button"></div>
+      <p id="auth-status" class="muted">Belum masuk.</p>
+      <dl id="user-info" class="kv" hidden>
+        <dt>Nama</dt><dd id="u-name"></dd>
+        <dt>Email</dt><dd id="u-email"></dd>
+        <dt>User ID</dt><dd id="u-id" class="mono"></dd>
+        <dt>Akun baru?</dt><dd id="u-new"></dd>
+        <dt>Dibuat</dt><dd id="u-created" class="mono"></dd>
+        <dt>Login terakhir</dt><dd id="u-last" class="mono"></dd>
+        <dt>Sesi berakhir</dt><dd id="u-exp" class="mono"></dd>
+      </dl>
+      <div class="row">
+        <button type="button" id="btn-me">Cek sesi (auth.me)</button>
+        <button type="button" id="btn-logout" class="secondary">Logout</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2 · Uji Gemini (ai.testRewrite)</h2>
+      <label for="ai-input">Teks contoh (sintetis)</label>
+      <textarea id="ai-input" rows="4">Dalam era perkembangan teknologi yang semakin pesat, penggunaan kecerdasan buatan telah memberikan dampak yang signifikan terhadap berbagai aspek kehidupan manusia.</textarea>
+      <div class="row">
+        <button type="button" id="btn-ai">Tulis ulang</button>
+        <span id="ai-status" class="muted"></span>
+      </div>
+      <label for="ai-output">Hasil</label>
+      <div id="ai-output" class="output" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <h2>3 · Uji negatif &amp; keamanan</h2>
+      <p class="muted">Setiap tombol harus menghasilkan <em>ditolak</em> dengan kode error yang tertulis.</p>
+      <div class="grid">
+        <button type="button" data-test="fake-id-token">Token Google palsu → INVALID_ID_TOKEN</button>
+        <button type="button" data-test="no-session">auth.me tanpa sesi → UNAUTHENTICATED</button>
+        <button type="button" data-test="random-session">auth.me dengan sesi acak → UNAUTHENTICATED</button>
+        <button type="button" data-test="unknown-action">Aksi tidak dikenal → UNKNOWN_ACTION</button>
+        <button type="button" data-test="forged-user">auth.me dengan userId palsu di payload → tetap user asli</button>
+        <button type="button" data-test="replay-id-token">Kirim ulang token Google terakhir (setelah &gt;1 jam → ditolak)</button>
+        <button type="button" data-test="double-login">Login ganda bersamaan (token Google terakhir, 2× paralel)</button>
+        <button type="button" data-test="old-session">auth.me dengan sesi sebelum logout → UNAUTHENTICATED</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>4 · Log teknis</h2>
+      <p class="muted">Token tidak pernah ditampilkan di log.</p>
+      <div class="row"><button type="button" id="btn-clear" class="secondary">Bersihkan log</button></div>
+      <pre id="log" class="log"></pre>
+    </section>
+  </main>
+
+  <!-- Urutan penting: semua skrip "defer" dijalankan berurutan setelah HTML selesai dibaca. -->
+  <script src="https://accounts.google.com/gsi/client" defer></script>
+  <script src="js/config.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/auth.js" defer></script>
+  <script src="js/app.js" defer></script>
+</body>
+</html>
